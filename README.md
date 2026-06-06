@@ -37,96 +37,103 @@ MOTHER/
 ├── scripts/                   
 ├── venv/                      
 ├── .gitignore                 
+├── api_mother.log               
 ├── cargar_db.py               
 ├── ejemplo_prediccion.py      
 ├── interfaz_mother.html       
-├── logging_automatizacion_reentrenamiento.log 
-├── logging_motor_prediccion.log               
 ├── main.py                    
+├── mlops_pipeline.log         
 ├── pipeline_papermill.py      
 ├── README.md                  
 └── requirements.txt           
-📖 Descripción de Directorios
-auditoria_modelos/: Almacena los reportes inmutables (.ipynb ejecutados) generados automáticamente por Papermill cada vez que se reentrena el modelo.
+```
 
-data/: Contiene los conjuntos de datos. Suele subdividirse en raw/ (archivos crudos originales del gobierno) y processed/ (datasets limpios e integrados listos para el modelo). (Nota: Por el peso, los archivos CSV grandes están ignorados en el .gitignore).
+### 📖 Descripción de Directorios
 
-inputs/: Contiene el Cuaderno Jupyter maestro parametrizado (3_modelado_evaluacion.ipynb) que utiliza Papermill como plantilla para ejecutar los reentrenamientos.
+* **`auditoria_modelos/`**: Almacena los reportes inmutables (`.ipynb` ejecutados) generados automáticamente por Papermill cada vez que se reentrena el modelo.
+* **`data/`**: Contiene los conjuntos de datos. Se subdivide en `raw/` (archivos crudos originales del gobierno) y `processed/` (datasets limpios listos para el modelo). Los archivos CSV grandes están ignorados en el `.gitignore`.
+* **`inputs/`**: Contiene el Cuaderno Jupyter maestro parametrizado (`3_modelado_evaluacion.ipynb`) que utiliza Papermill como plantilla para ejecutar los reentrenamientos de forma automatizada.
+* **`models/`**: Directorio donde se guardan los artefactos binarios (`.pkl`) empaquetados por el pipeline, listos para ser consumidos por la API.
+* **`assets/`**: Recursos visuales del proyecto, como diagramas de arquitectura, logotipos y capturas de pantalla de la interfaz de usuario.
+* **`notebooks/`**: Cuadernos de Jupyter utilizados para el Análisis Exploratorio de Datos (EDA) inicial, limpieza y pruebas de concepto.
+* **`scripts/`**: Módulos de Python con funciones auxiliares y utilidades reutilizables de código para mantener limpio el repositorio.
+* **Archivos Raíz (`.py`, `.html`, `.log`)**: Los scripts principales de ejecución, incluyendo el servidor backend (`main.py`), el orquestador (`pipeline_papermill.py`), el frontend (`interfaz_mother.html`) y los archivos de registros de eventos históricos del ecosistema.
 
-models/: Directorio donde se guardan los artefactos binarios (.pkl) empaquetados por el pipeline, listos para ser consumidos por la API.
+---
 
-assets/: Recursos visuales del proyecto, como diagramas de arquitectura, logotipos y capturas de pantalla de la interfaz de usuario.
+## ⚙️ Guía de Instalación y Despliegue Local
 
-notebooks/: Cuadernos de Jupyter utilizados para el Análisis Exploratorio de Datos (EDA) inicial, limpieza y pruebas de concepto.
-
-scripts/: Módulos de Python con funciones auxiliares y utilidades reutilizables.
-
-Archivos Raíz (.py, .html, .log): Los scripts principales de ejecución, incluyendo el servidor backend (main.py), el orquestador (pipeline_papermill.py), el frontend (interfaz_mother.html) y los registros del sistema.
-
-⚙️ Guía de Instalación y Despliegue Local
 Sigue estos pasos rigurosamente para levantar el entorno completo en tu máquina.
 
-Paso 1: Clonar el Repositorio
-Bash
+### Paso 1: Clonar el Repositorio
+```bash
 git clone [https://github.com/tu-usuario/MOTHER.git](https://github.com/tu-usuario/MOTHER.git)
 cd MOTHER
-Paso 2: Crear y Activar Entorno Virtual
-En Windows:
+```
 
-Bash
+### Paso 2: Crear y Activar Entorno Virtual
+En Windows:
+```bash
 python -m venv venv
 venv\Scripts\activate
+```
 En Linux/macOS:
-
-Bash
+```bash
 python3 -m venv venv
 source venv/bin/activate
-Paso 3: Instalar Dependencias
+```
+
+### Paso 3: Instalar Dependencias
 Instala todas las librerías necesarias, incluyendo las herramientas de MLOps:
-
-Bash
+```bash
 pip install -r requirements.txt
-Paso 4: Preparar Datos Crudos
-Coloca los archivos originales de datos CSV descargados desde las fuentes oficiales dentro de la carpeta data/raw/.
+```
 
-Paso 5: Registrar el Kernel de Python (Para Papermill)
+### Paso 4: Preparar Datos Crudos
+Coloca los archivos originales de datos CSV descargados desde las fuentes oficiales dentro de la carpeta `data/raw/`.
+
+### Paso 5: Registrar el Kernel de Python (Para Papermill)
 Para que el motor de automatización reconozca tu entorno virtual al reentrenar cuadernos, ejecuta:
-
-Bash
+```bash
 python -m ipykernel install --user --name=python3
-Paso 6: Configurar MongoDB (El Registro MLOps)
-El sistema utiliza MongoDB para guardar logs operativos.
+```
 
-Descarga e instala MongoDB Community Server.
+### Paso 6: Configurar MongoDB (El Registro MLOps)
+El sistema utiliza MongoDB para guardar logs operativos y de auditoría histórica.
 
-Asegúrate de instalar también MongoDB Compass (el visor gráfico).
-
-Levanta el servicio (suele correr por defecto en mongodb://localhost:27017/).
-
-Inicializa la Base de Datos Histórica: Ejecuta el script de carga inicial para subir los parámetros, métricas y datos de auditoría a la base de datos:
-
-Bash
+1. Descarga e instala **MongoDB Community Server**.
+2. Asegúrate de instalar también **MongoDB Compass** (el visor gráfico).
+3. Levanta el servicio (suele correr por defecto en `mongodb://localhost:27017/`).
+4. **Inicializa la Base de Datos Histórica:** Ejecuta el script de carga inicial para subir los parámetros a la base de datos:
+```bash
 python cargar_db.py
-🚀 Uso del Ecosistema en Producción
-1. Levantar el Servidor (Backend)
+```
+
+---
+
+## 🚀 Uso del Ecosistema en Producción
+
+### 1. Levantar el Servidor (Backend)
 Con el entorno virtual activado, ejecuta el siguiente comando para encender la API de predicción:
 
-Bash
+```bash
 uvicorn main:app --reload
-(El servidor quedará escuchando en el puerto 8000. Los eventos quedarán registrados en logging_motor_prediccion.log).
+```
 
-2. Abrir la Interfaz de Usuario (Frontend)
-El frontend está completamente desacoplado. No necesitas un servidor web adicional para visualizarlo:
+*(El servidor quedará escuchando en el puerto 8000. Todos los eventos técnicos y consultas quedarán registrados automáticamente en el archivo `api_mother.log`).*
 
-Ve a la carpeta raíz del proyecto.
+### 2. Abrir la Interfaz de Usuario (Frontend)
+El frontend está completamente desacoplado de servidores web complejos:
 
-Haz doble clic en el archivo interfaz_mother.html para abrirlo en tu navegador.
+1. Ve a la carpeta raíz del proyecto.
+2. Haz doble clic en el archivo `interfaz_mother.html` para abrirlo directamente en tu navegador web.
+3. Ingresa los datos de un siniestro vial simulado y presiona **"Realizar Triage"**. Verás la alerta visual operativa instantánea (Código Rojo o Verde) y el log correspondiente se guardará de forma persistente en MongoDB.
 
-Ingresa los datos de un siniestro y presiona "Realizar Triage". Verás la alerta visual (Código Rojo o Verde) y el log se guardará en MongoDB.
+### 3. Ejecutar Reentrenamiento Automático (Papermill)
+Si ingresan nuevos datos al sistema y deseas reentrenar el modelo generando un reporte auditable e inmutable, ejecuta el robot orquestador desde la terminal:
 
-3. Ejecutar Reentrenamiento Automático (Papermill)
-Si ingresan nuevos datos al sistema y deseas reentrenar el modelo generando un reporte auditable, ejecuta el robot orquestador:
-
-Bash
+```bash
 python pipeline_papermill.py
-Resultado: Se generará un nuevo modelo .pkl en la carpeta models/, un reporte inmutable con las gráficas de validación en la carpeta auditoria_modelos/, y la operación quedará registrada en logging_automatizacion_reentrenamiento.log.
+```
+
+**Resultado:** Se generará un nuevo cerebro del modelo `.pkl` actualizado en la carpeta `models/`, un reporte completo e inmutable con las gráficas de validación en la carpeta `auditoria_modelos/`, y la trazabilidad de la operación quedará registrada en el archivo `mlops_pipeline.log`.
